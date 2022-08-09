@@ -63,29 +63,30 @@ public class AccountService {
 	
 	}
 	
-	public HashMap<String, Object> bankTransfer(Map<String, Object> senderAccount, Map<String, Object> receiverAccount, int moneyToSend) {
+	public HashMap<String, Object> bankTransfer(Map<String, Object> senderAccount, Map<String, Object> receiverAccount, int moneyToSend, boolean bankToBank) {
 		
 		HashMap<String, Object> statusResponse = new HashMap<>();
 		
 		// check for same bank or not.
-	
 		String id = senderAccount.get("id").toString();
-		String senderBank = senderAccount.get("name").toString();
-		String[] keywords = senderBank.split(" ");
-		String exactBankName = keywords[0];
-		
-		System.out.print(exactBankName);
-		
-		if(!receiverAccount.get("bank").toString().contains(exactBankName)) {
-			statusResponse.put("status", "success"); 
-			statusResponse.put("message", "cannot initiate transactions with other banks");
-			statusResponse.put("code", "201"); 
-			
-			
-			return statusResponse;
-		}
+
 	
-		
+		if(bankToBank) {
+			String senderBank = senderAccount.get("name").toString();
+			String[] keywords = senderBank.split(" ");
+			String exactBankName = keywords[0];
+			
+			System.out.print(exactBankName);
+			
+			if(!receiverAccount.get("bank").toString().contains(exactBankName)) {
+				statusResponse.put("status", "success"); 
+				statusResponse.put("message", "cannot initiate transactions with other banks");
+				statusResponse.put("code", "201"); 
+				
+				
+				return statusResponse;
+			}
+		}
 		
 		boolean checkedBalance = false;
 		
@@ -105,7 +106,7 @@ public class AccountService {
 		
 //		check balance first.
 		
-		else if(moneyToSend < (int) senderAccount.get("balance")) {
+		else if(moneyToSend <= (int) senderAccount.get("balance")) {
 			
 			currentBalance -= moneyToSend; 
 			senderAccount.put("balance", currentBalance);
@@ -120,7 +121,8 @@ public class AccountService {
 			senderAccount.put("type", "bank transfer");
 
 //			update the balance
-			updateBalance(id, currentBalance, "bank transfer");
+			
+			updateBalance(id, currentBalance, (bankToBank) ? "bank transfer": "customer transfer");
 			
 //			return the response
 			statusResponse.put("status", "success"); 
@@ -147,12 +149,38 @@ public class AccountService {
 		Map<String, Object> receiverAccount = (Map<String, Object>) details.get("receiverDetails");
 		HashMap<String, Object> statusResponse = new HashMap<>();
 
+		String senderBank = senderAccount.get("name").toString();
+		String[] keywords = senderBank.split(" ");
+		String exactBankName = keywords[0];
 		
-		String typeOfTransaction = details.get("type").toString();
+		
+		String typeOfTransaction = details.get("transactionType").toString();
 		int moneyToSend  = (int) details.get("moneyToSend");
 		
 		if(typeOfTransaction.equals("bank")) {
-			statusResponse = bankTransfer(senderAccount, receiverAccount, moneyToSend);
+		
+			if(!"HDFC".equals(exactBankName.toUpperCase())) {
+				statusResponse.put("status", "success"); 
+				statusResponse.put("message", "Account doesn't correspond to bank to bank transfer");
+				statusResponse.put("code", "201"); 
+				
+				return statusResponse;
+			}
+			statusResponse = bankTransfer(senderAccount, receiverAccount, moneyToSend, true);
+		}
+		else {
+			
+			
+			if("HDFC".equals(exactBankName.toUpperCase())) {
+				statusResponse.put("status", "success"); 
+				statusResponse.put("message", "Account doesn't correspond to customer to bank transfer");
+				statusResponse.put("code", "201"); 
+				
+				return statusResponse;
+			}
+			
+			statusResponse = bankTransfer(senderAccount, receiverAccount, moneyToSend, false);
+
 		}
 		
 		return statusResponse;
