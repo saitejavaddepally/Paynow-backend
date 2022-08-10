@@ -5,7 +5,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -13,7 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.dbs.paynow.Account.Account;
 import com.dbs.paynow.Account.Receiver;
+import com.dbs.paynow.Account.Transaction;
 import com.dbs.paynow.service.AccountService;
+import com.dbs.paynow.service.TransactionService;
 
 @RestController
 public class AccountController {
@@ -22,6 +26,9 @@ public class AccountController {
 	
 	@Autowired
 	AccountService service;
+	
+	@Autowired
+	TransactionService transactionService;
 	
 
 	
@@ -77,6 +84,27 @@ public class AccountController {
 		return response;
 	}
 	
-	
+	@RequestMapping("/all")
+	public List<Transaction> GetAll(){
+    List<Transaction> Tlist=transactionService.getall();
+        return Tlist;
+    }
+
+    @PostMapping("/addNewTran")
+    public String addNewEmpRecord(@RequestBody Transaction tran) {
+
+        return transactionService.addNewTran(tran);
+    }
+
+    @PutMapping("/updateTran")
+    public String updateEmpRec(@RequestBody Transaction tran) {
+        return transactionService.addNewTran(tran);
+
+    }
+
+    @DeleteMapping("/deleteTran")
+    public String deleteEmp(@RequestParam int UTR_NUM) {
+        return transactionService.deleteTran(UTR_NUM);
+    }
 
 }

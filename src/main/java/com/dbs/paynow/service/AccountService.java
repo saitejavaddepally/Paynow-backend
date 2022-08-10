@@ -1,14 +1,18 @@
 package com.dbs.paynow.service;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import com.dbs.paynow.Account.Account;
 import com.dbs.paynow.Account.Receiver;
+import com.dbs.paynow.Account.Transaction;
 import com.dbs.paynow.repo.AccountRepo;
 import com.dbs.paynow.repo.RecieverRepo;
 
@@ -36,6 +40,11 @@ public class AccountService {
 	
 	@Autowired
 	RecieverRepo receiverRepo; 
+	
+
+	
+	@Autowired
+	TransactionService transactionService;
 	
 	public List<Account> findAllAccountHolderNames(){
 		
@@ -69,7 +78,22 @@ public class AccountService {
 		
 		// check for same bank or not.
 		String id = senderAccount.get("id").toString();
+		String receiverBic = receiverAccount.get("bic").toString();
+		
+//		Generate random urn number
+		Random r = new Random();
+		int urnNumber = 1000000000 + (int)(r.nextDouble() * 999999999);
 
+	    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");  
+	    LocalDateTime now = LocalDateTime.now();  
+	    
+//	    initiate transaction
+	    Transaction transaction = new Transaction();
+	    transaction.setAmount(moneyToSend);
+	    transaction.setBENEFICIARY_ACNUM(receiverBic);
+	    transaction.setDOT(dtf.format(now).toString()); 
+	    transaction.setUTR_NUMBER(urnNumber);
+	    transaction.setSENDER_ACNUM(id);
 	
 		if(bankToBank) {
 			String senderBank = senderAccount.get("name").toString();
@@ -128,14 +152,19 @@ public class AccountService {
 			statusResponse.put("status", "success"); 
 			statusResponse.put("balanceRemaining", currentBalance); 
 			statusResponse.put("code", "200"); 
+			
+			transaction.setSTATUS(true);
+
 
 		}
 		
 		else {
 			statusResponse.put("status", "failure"); 
 			statusResponse.put("code", "400"); 
-			
+			transaction.setSTATUS(false);
 		}
+		
+		transactionService.addNewTran(transaction);
 
 		
 		return statusResponse;
