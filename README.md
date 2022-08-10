@@ -80,3 +80,18 @@ or
     },
     "status": 200
 }
+
+METHOD: POST
+
+REQUEST: 
+ {
+        "amount": 25000,
+        "beneficiary_ACNUM": 98765432,
+        "utr_NUMBER": 12334457,
+        "status": false, 
+        "sender_ACNUM": 132456,
+        "dot": "2017-06-18"
+    }
+    
+RESPONSE: 
+'ADDED transaction successfully"
