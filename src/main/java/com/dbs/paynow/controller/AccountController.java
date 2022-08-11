@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -19,6 +20,8 @@ import com.dbs.paynow.Account.Transaction;
 import com.dbs.paynow.service.AccountService;
 import com.dbs.paynow.service.TransactionService;
 
+@CrossOrigin(origins = "http://localhost:4200/")
+//@CrossOrigin("*")
 @RestController
 public class AccountController {
 	
