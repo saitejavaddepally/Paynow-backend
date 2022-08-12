@@ -52,6 +52,11 @@ public class AccountService {
 	public Account findById(String id) {
 		return repo.findById(id).orElse(new Account());
 	}
+	
+	public Receiver findByBic(String id) {
+		return receiverRepo.findById(id).orElse(new Receiver());
+	}
+
 
 	public List<Receiver> findByBankName(String bankName) {
 		return receiverRepo.findByBankContaining(bankName);
