@@ -12,17 +12,19 @@ public class Transaction {
     boolean STATUS;
     String SENDER_ACNUM;
     String BENEFICIARY_ACNUM;
-    int amount;
+    String amount;
+    String code;
 	public Transaction() {
 	    // TODO Auto-generated constructor stub
 	}
-	public Transaction(int uTR_NUMBER, String dOT, boolean sTATUS, String sENDER_ACNUM, String bENEFICIARY_ACNUM, int amount) {
+	public Transaction(int uTR_NUMBER, String dOT, boolean sTATUS, String sENDER_ACNUM, String bENEFICIARY_ACNUM, String amount, String code) {
 	    super();
 	    UTR_NUMBER = uTR_NUMBER;
 	    DOT = dOT;
 	    STATUS = sTATUS;
 	    SENDER_ACNUM = sENDER_ACNUM;
 	    BENEFICIARY_ACNUM = bENEFICIARY_ACNUM;
+	    this.code = code;
 	    this.amount = amount;
 	}
 	public int getUTR_NUMBER() {
@@ -55,11 +57,19 @@ public class Transaction {
 	public void setBENEFICIARY_ACNUM(String bENEFICIARY_ACNUM) {
 	    BENEFICIARY_ACNUM = bENEFICIARY_ACNUM;
 	}
-	public int getAmount() {
+	public String getAmount() {
 	    return amount;
 	}
-	public void setAmount(int amount) {
+	public void setAmount(String amount) {
     this.amount = amount;
 }
+	
+	public String getCode() {
+		return code;
+	}
+	
+	public void setCode(String code) {
+		this.code = code;
+	}
 
 }

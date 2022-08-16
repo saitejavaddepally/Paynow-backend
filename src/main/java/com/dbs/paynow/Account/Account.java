@@ -11,7 +11,7 @@ public class Account {
 	@Id
 	String id; 
 	String name; 
-	int balance; 
+	double balance; 
 	String type; 
 	String od;
 	
@@ -28,10 +28,10 @@ public class Account {
 	public void setName(String name) {
 		this.name = name;
 	}
-	public int getBalance() {
+	public double getBalance() {
 		return balance;
 	}
-	public void setBalance(int balance) {
+	public void setBalance(double balance) {
 		this.balance = balance;
 	}
 	public String getType() {

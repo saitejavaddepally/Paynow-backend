@@ -1,5 +1,9 @@
 package com.dbs.paynow.service;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -62,7 +66,42 @@ public class AccountService {
 		return receiverRepo.findByBankContaining(bankName);
 	}
 
-	public Account updateBalance(String id, int balance, String type) {
+	public boolean findInTerrorList(String name) {
+		String[] words; 
+		BufferedReader br;
+		String inputFileName = "src/main/resources/db/data.txt"; 
+		try {
+			try (FileReader fr = new FileReader(inputFileName)) {
+				br = new BufferedReader(fr);
+				
+				String line;
+				while((line = br.readLine())!= null) {
+					words = line.split(" ");
+					for(String word: words) {
+						System.out.println(word);
+						if(word.equals(name)) {
+							return true;
+						}
+					}
+				}
+				
+				fr.close();
+			}
+			
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	
+		return false;
+		
+	}
+	
+	public Account updateBalance(String id, double balance, String type) {
 
 		Account accountDetails = findById(id);
 		accountDetails.setBalance(balance);
@@ -74,13 +113,14 @@ public class AccountService {
 	}
 
 	public HashMap<String, Object> bankTransfer(Map<String, Object> senderAccount, Map<String, Object> receiverAccount,
-			int moneyToSend, boolean bankToBank) {
+			int moneyToSend, boolean bankToBank, String code) {
 
 		HashMap<String, Object> statusResponse = new HashMap<>();
 
 		// check for same bank or not.
 		String id = senderAccount.get("id").toString();
 		String receiverBic = receiverAccount.get("bic").toString();
+
 
 //		Generate random urn number
 		Random r = new Random();
@@ -91,16 +131,19 @@ public class AccountService {
 
 //	    initiate transaction
 		Transaction transaction = new Transaction();
-		transaction.setAmount(moneyToSend);
+		transaction.setAmount(Double.toString(moneyToSend));
 		transaction.setBENEFICIARY_ACNUM(receiverBic);
 		transaction.setDOT(dtf.format(now).toString());
 		transaction.setUTR_NUMBER(urnNumber);
 		transaction.setSENDER_ACNUM(id);
+		transaction.setCode(code);
 
 		if (bankToBank) {
 			String senderBank = senderAccount.get("name").toString();
 			String[] keywords = senderBank.split(" ");
 			String exactBankName = keywords[0];
+			
+	
 
 			System.out.print(exactBankName);
 
@@ -115,7 +158,7 @@ public class AccountService {
 
 		boolean checkedBalance = false;
 
-		int currentBalance = (int) senderAccount.get("balance");
+		double currentBalance = Double.parseDouble(senderAccount.get("balance").toString());
 
 //		check if OD is true
 
@@ -130,10 +173,10 @@ public class AccountService {
 
 //		check balance first.
 
-		else if (moneyToSend <= (int) senderAccount.get("balance")) {
+		else if (moneyToSend <= currentBalance) {
 
-			currentBalance -= moneyToSend;
-			senderAccount.put("balance", currentBalance);
+			currentBalance -= moneyToSend + moneyToSend*0.0025;
+			senderAccount.put("balance", String.format("%.2f", currentBalance));
 
 			checkedBalance = true;
 		}
@@ -174,7 +217,14 @@ public class AccountService {
 		Map<String, Object> senderAccount = (Map<String, Object>) details.get("senderDetails");
 		Map<String, Object> receiverAccount = (Map<String, Object>) details.get("receiverDetails");
 		HashMap<String, Object> statusResponse = new HashMap<>();
-
+		String receiverName = details.get("receiverName").toString();
+		
+		if(findInTerrorList(receiverName)) {
+			statusResponse.put("status", "failure");
+			statusResponse.put("message", "Name is in the terrorList");
+			statusResponse.put("code", "201");
+			return statusResponse;
+		}
 		String senderBank = senderAccount.get("name").toString();
 		String[] keywords = senderBank.split(" ");
 		String exactBankName = keywords[0];
@@ -191,7 +241,7 @@ public class AccountService {
 
 				return statusResponse;
 			}
-			statusResponse = bankTransfer(senderAccount, receiverAccount, moneyToSend, true);
+			statusResponse = bankTransfer(senderAccount, receiverAccount, moneyToSend, true, details.get("code").toString());
 		} else {
 
 			if ("HDFC".equals(exactBankName.toUpperCase())) {
@@ -202,7 +252,7 @@ public class AccountService {
 				return statusResponse;
 			}
 
-			statusResponse = bankTransfer(senderAccount, receiverAccount, moneyToSend, false);
+			statusResponse = bankTransfer(senderAccount, receiverAccount, moneyToSend, false, details.get("code").toString());
 
 		}
 

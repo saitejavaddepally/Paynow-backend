@@ -15,7 +15,7 @@ public class PaynowApplication {
 	public static void main(String[] args) {
 		DayOfWeek dayOfWeek = DayOfWeek.from(LocalDate.now());
 		
-		if(dayOfWeek.toString().equals("FRIDAY") || dayOfWeek.toString().equals("THURSDAY")) {
+		if(dayOfWeek.toString().equals("SATURDAY") || dayOfWeek.toString().equals("SUNDAY")) {
 			System.out.print("Am I here? ");
 			ConfigurableApplicationContext ctx = new SpringApplicationBuilder(PaynowApplication.class)
 					  .web(WebApplicationType.NONE).run();
